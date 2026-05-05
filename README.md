@@ -4,7 +4,7 @@ Monitors your EVE Online overview panel using OCR and logs every new contact to 
 
 ## Download
 
-**[⬇ Download eve-gate-logger-v1.0.0-windows.zip](https://github.com/pa0l0s/eve-gate-logger/releases/download/v1.0.0/eve-gate-logger-v1.0.0-windows.zip)**
+**[⬇ Download eve-gate-logger-v1.1.0-windows.zip](https://github.com/pa0l0s/eve-gate-logger/releases/download/v1.1.0/eve-gate-logger-v1.1.0-windows.zip)**
 
 No Python or Tesseract installation required — everything is bundled.
 
@@ -64,10 +64,10 @@ Each new contact is appended to the CSV with the following columns:
 
 | Column | Example |
 |--------|---------|
-| timestamp | 2026-05-05 23:12:05 |
-| name | Koechka |
-| type | Atron |
-| tags | [.NLC.] [BUSHI] |
+| timestamp | 2026-05-06 00:13:11 |
+| name | SumoEnjoyer |
+| type | Venture |
+| tags | [STI] |
 | event | appeared |
 
 Duplicate entries caused by OCR noise are suppressed automatically (fuzzy deduplication with a 120-second cooldown window).
@@ -79,12 +79,16 @@ Duplicate entries caused by OCR noise are suppressed automatically (fuzzy dedupl
 When a new contact appears a message is posted to each configured webhook:
 
 ```
-`23:12` Koechka Atron [.NLC.](<https://zkillboard.com/corporation/.../>)[BUSHI](<https://zkillboard.com/corporation/.../>)
+`00:13` SumoEnjoyer [Venture](<https://zkillboard.com/ship/609/>) [STI](<https://zkillboard.com/corporation/.../>)
 ```
 
-- Corp and alliance tags are resolved to zKillboard links via the EVE ESI API
-- Tags must be 1–5 characters of capital letters, digits, `.`, `-`, or space
-- Links are suppressed for tags that cannot be resolved
+Message format: `time` · pilot name · ship type · corp/alliance tags
+
+- Ship type is matched against all EVE ship types and linked to zKillboard
+- Corp and alliance tags are resolved to zKillboard corporation links via the EVE ESI API
+- Tags are 1–5 characters: letters, digits, `.`, `-`, or space (case-insensitive, shown in uppercase)
+- Links are suppressed for tags or ship names that cannot be resolved
+- The ship type list is refreshed automatically from ESI on each startup; the bundled list is used as fallback if ESI is unreachable
 
 ---
 
