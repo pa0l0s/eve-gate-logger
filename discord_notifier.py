@@ -33,7 +33,10 @@ def _send(webhooks: list[str], contact: Contact, timestamp: str) -> None:
     else:
         ship_part = contact.ship_type
 
-    parts = [contact.pilot_name] + tag_parts + ([ship_part] if ship_part else [])
+    parts = [contact.pilot_name]
+    if ship_part:
+        parts.append(ship_part)
+    parts.extend(tag_parts)
     line = f"`{time_str}` {' '.join(parts)}"
     payload = json.dumps({"content": line}).encode()
 

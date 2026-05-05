@@ -13,8 +13,15 @@ def enrich(ship: Ship) -> Contact:
     if sm:
         ship_type = sm.canonical_name
         ship_type_id = sm.type_id
+        # Strip the matched OCR variant from the end of pilot_name if it bled
+        # from the type column into the name column due to a column boundary offset
+        pilot_name = re.sub(
+            r'\s+' + re.escape(sm.ocr_variant) + r'$', '',
+            ship.name, flags=re.IGNORECASE
+        ).strip()
     else:
         ship_type = _TAGS_RE.sub("", ship.ship_type).strip()
         ship_type_id = None
+        pilot_name = ship.name
 
-    return Contact(ship.name, ship_type, ship_type_id, tags)
+    return Contact(pilot_name, ship_type, ship_type_id, tags)
