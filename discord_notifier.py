@@ -6,7 +6,7 @@ from config import Ship
 import ship_matcher
 
 _USER_AGENT = "DiscordBot (https://github.com/pa0l0s/eve-gate-logger, 1.0)"
-_TAG_RE = re.compile(r'\[([A-Z.\- ]{1,5})\]')
+_TAG_RE = re.compile(r'\[([A-Z.\- ]{1,5})\]', re.IGNORECASE)
 
 # ticker -> zKillboard URL (or None if not resolvable), persists for the session
 _corp_cache: dict[str, str | None] = {}
@@ -28,16 +28,17 @@ def _send(webhooks: list[str], ship: Ship, timestamp: str) -> None:
     tags = _TAG_RE.findall(f"{ship.name} {ship.ship_type}")
     zkill_parts: list[str] = []
     for tag in tags:
-        url = _resolve_corp(tag)
+        tag_upper = tag.upper()
+        url = _resolve_corp(tag_upper)
         if url:
-            zkill_parts.append(f"[{tag}](<{url}>)")
+            zkill_parts.append(f"[{tag_upper}](<{url}>)")
         else:
-            zkill_parts.append(f"[{tag}]")
+            zkill_parts.append(f"[{tag_upper}]")
 
-    # Rebuild line replacing [TAG] tokens with annotated versions
+    # Rebuild line replacing [TAG] tokens with annotated versions (case-insensitive match)
     annotated = base
     for i, tag in enumerate(tags):
-        annotated = annotated.replace(f"[{tag}]", zkill_parts[i], 1)
+        annotated = re.sub(re.escape(f"[{tag}]"), zkill_parts[i], annotated, count=1, flags=re.IGNORECASE)
 
     # Try to match a known ship type and hyperlink it
     sm = ship_matcher.match_ship(ship.name, ship.ship_type)
