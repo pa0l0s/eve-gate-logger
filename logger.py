@@ -6,7 +6,8 @@ from difflib import SequenceMatcher
 from config import Ship
 import discord_notifier
 
-FIELDNAMES = ["timestamp", "name", "type", "event"]
+FIELDNAMES = ["timestamp", "name", "type", "tags", "event"]
+_TAGS_RE = re.compile(r'\[[^\]]*\]')
 DEDUP_COOLDOWN_SECONDS = 120
 DEDUP_SIMILARITY = 0.75
 
@@ -26,10 +27,13 @@ class CSVLogger:
         now = datetime.now()
         self._recent[key] = now
         iso_ts = now.strftime("%Y-%m-%dT%H:%M:%S")
+        type_clean = _TAGS_RE.sub("", ship.ship_type).strip()
+        tags = " ".join(_TAGS_RE.findall(ship.ship_type))
         row = {
             "timestamp": now.strftime("%Y-%m-%d %H:%M:%S"),
             "name": ship.name,
-            "type": ship.ship_type,
+            "type": type_clean,
+            "tags": tags,
             "event": "appeared",
         }
         try:
