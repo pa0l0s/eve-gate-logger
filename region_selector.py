@@ -1,4 +1,3 @@
-import tkinter as tk
 from typing import Optional
 from config import Region
 
@@ -8,6 +7,8 @@ def select_region() -> Optional[Region]:
     User clicks and drags to select the overview region.
     Returns the selected Region, or None if cancelled (Escape).
     """
+    import tkinter as tk
+
     result: list[Optional[Region]] = [None]
 
     root = tk.Tk()
