@@ -12,6 +12,10 @@ _EVE_COLUMN_HEADERS = frozenset({
     "Militia", "Size", "Status",
 })
 
+# Words that appear in EVE UI messages shown when the overview is empty.
+# Checked against the full row so split doesn't matter ("Nothing" / "Found").
+_EVE_UI_MESSAGE_WORDS = frozenset({"Nothing", "Found"})
+
 def preprocess_image(image: Image.Image) -> Image.Image:
     gray = image.convert("L")
     return ImageOps.invert(gray)
@@ -30,7 +34,7 @@ def parse_overview_image(image: Image.Image, column_map: ColumnMap) -> set[Ship]
 
 def _is_header_row(row: list[dict]) -> bool:
     words = {w["text"] for w in row}
-    return len(words & _EVE_COLUMN_HEADERS) >= 2
+    return len(words & _EVE_COLUMN_HEADERS) >= 2 or _EVE_UI_MESSAGE_WORDS.issubset(words)
 
 def _group_words_by_row(data: dict) -> list[list[dict]]:
     words = [
