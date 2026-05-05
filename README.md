@@ -65,8 +65,9 @@ Each new contact is appended to the CSV with the following columns:
 | Column | Example |
 |--------|---------|
 | timestamp | 2026-05-05 23:12:05 |
-| name | Koechka Atron |
-| type | [.NLC.] [BUSHI] |
+| name | Koechka |
+| type | Atron |
+| tags | [.NLC.] [BUSHI] |
 | event | appeared |
 
 Duplicate entries caused by OCR noise are suppressed automatically (fuzzy deduplication with a 120-second cooldown window).
