@@ -1,0 +1,6 @@
+mss==9.0.2
+pytesseract==0.3.13
+Pillow==10.3.0
+pywin32==306
+pyinstaller==6.6.0
+pytest==8.2.0
