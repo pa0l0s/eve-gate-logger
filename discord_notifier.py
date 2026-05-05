@@ -3,6 +3,7 @@ import re
 import threading
 import urllib.request
 from config import Ship
+import ship_matcher
 
 _USER_AGENT = "DiscordBot (https://github.com/pa0l0s/eve-gate-logger, 1.0)"
 _TAG_RE = re.compile(r'\[([A-Z.\- ]{1,5})\]')
@@ -37,6 +38,13 @@ def _send(webhooks: list[str], ship: Ship, timestamp: str) -> None:
     annotated = base
     for i, tag in enumerate(tags):
         annotated = annotated.replace(f"[{tag}]", zkill_parts[i], 1)
+
+    # Try to match a known ship type and hyperlink it
+    sm = ship_matcher.match_ship(ship.name, ship.ship_type)
+    if sm:
+        ship_link = f"[{sm.canonical_name}](<https://zkillboard.com/ship/{sm.type_id}/>)"
+        # Replace the OCR variant in the annotated text (case-insensitive)
+        annotated = re.sub(re.escape(sm.ocr_variant), ship_link, annotated, count=1, flags=re.IGNORECASE)
 
     line = f"`{time_str}` {annotated}"
     payload = json.dumps({"content": line}).encode()

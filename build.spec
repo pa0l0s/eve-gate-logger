@@ -12,6 +12,7 @@ a = Analysis(
     ],
     datas=[
         (os.path.join(TESSERACT_DIR, "tessdata", "eng.traineddata"), "tessdata"),
+        ("esi_ship_types/ship_types.csv", "esi_ship_types"),
     ],
     hiddenimports=["win32gui", "win32con", "PIL._tkinter_finder"],
     hookspath=[],
