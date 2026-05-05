@@ -1,6 +1,12 @@
 import argparse
+import os
 import sys
 import time
+
+import pytesseract
+
+if getattr(sys, "frozen", False):
+    pytesseract.pytesseract.tesseract_cmd = os.path.join(sys._MEIPASS, "tesseract.exe")
 
 from config import Config, Region, ColumnMap, load_config, save_config, clear_region, DEFAULT_INI
 from capture import capture_region
@@ -72,7 +78,7 @@ def main() -> None:
 
     region, column_map, tracker, logger = build_components(cfg)
 
-    print(f"[eve-gate-logger] Scanning every {cfg.interval_seconds}s → {cfg.csv_path}")
+    print(f"[eve-gate-logger] Scanning every {cfg.interval_seconds}s -> {cfg.csv_path}")
     try:
         while True:
             try:
