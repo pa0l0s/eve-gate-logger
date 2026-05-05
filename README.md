@@ -57,6 +57,8 @@ webhooks =
 
 Multiple Discord webhooks are supported — add each on its own indented line.
 
+New to webhooks? See [Intro to Webhooks](https://support.discord.com/hc/en-us/articles/228383668-Intro-to-Webhooks) on the Discord support site for step-by-step instructions on how to create one.
+
 ---
 
 ## CSV Log
