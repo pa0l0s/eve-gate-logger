@@ -59,6 +59,28 @@ Multiple Discord webhooks are supported — add each on its own indented line.
 
 New to webhooks? See [Intro to Webhooks](https://support.discord.com/hc/en-us/articles/228383668-Intro-to-Webhooks) on the Discord support site for step-by-step instructions on how to create one.
 
+### Telegram (optional)
+
+```ini
+[telegram]
+bot_token = 123456789:ABCdefGhIJKlmNoPQRsTUVwxyZ
+chat_ids =
+    -1001234567890
+    987654321
+```
+
+Multiple chat IDs are supported — add each on its own indented line.
+
+**How to set up a Telegram bot:**
+
+1. Open Telegram and search for **@BotFather**
+2. Send `/newbot` and follow the prompts — you will receive a **bot token** like `123456789:ABCdef...`
+3. Paste the token into `bot_token` in `settings.ini`
+4. To find your **chat ID**:
+   - For a personal chat: start a conversation with your bot, then open `https://api.telegram.org/bot<YOUR_TOKEN>/getUpdates` in a browser after sending any message to the bot — look for `"chat":{"id": ...}`
+   - For a group or channel: add the bot to the group/channel, send a message, then use the same `getUpdates` URL — the chat ID for groups/channels is a negative number (e.g. `-1001234567890`)
+5. Paste the chat ID(s) into `chat_ids` in `settings.ini`
+
 ---
 
 ## CSV Log

@@ -34,6 +34,8 @@ class Config:
     column_map: Optional[ColumnMap] = None
     csv_path: str = "eve_overview_log.csv"
     webhooks: list[str] = field(default_factory=list)
+    telegram_bot_token: str = ""
+    telegram_chat_ids: list[str] = field(default_factory=list)
 
 def load_config(path: str = DEFAULT_INI) -> Config:
     parser = configparser.ConfigParser()
@@ -47,6 +49,13 @@ def load_config(path: str = DEFAULT_INI) -> Config:
     cfg.webhooks = [
         u.strip() for u in raw_webhooks.replace(",", "\n").splitlines()
         if u.strip().startswith("https://discord.com/api/webhooks/")
+    ]
+
+    cfg.telegram_bot_token = parser.get("telegram", "bot_token", fallback="").strip()
+    raw_chat_ids = parser.get("telegram", "chat_ids", fallback="")
+    cfg.telegram_chat_ids = [
+        c.strip() for c in raw_chat_ids.replace(",", "\n").splitlines()
+        if c.strip()
     ]
 
     x = parser.get("region", "x", fallback="").strip()

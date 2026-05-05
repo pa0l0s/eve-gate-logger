@@ -5,6 +5,7 @@ from difflib import SequenceMatcher
 from config import Ship, Contact
 from enrich import enrich
 import discord_notifier
+import telegram_notifier
 
 FIELDNAMES = ["timestamp", "name", "type", "tags", "event"]
 DEDUP_COOLDOWN_SECONDS = 120
@@ -12,9 +13,17 @@ DEDUP_SIMILARITY = 0.75
 
 
 class CSVLogger:
-    def __init__(self, path: str, webhooks: list[str] | None = None) -> None:
+    def __init__(
+        self,
+        path: str,
+        webhooks: list[str] | None = None,
+        telegram_bot_token: str = "",
+        telegram_chat_ids: list[str] | None = None,
+    ) -> None:
         self._path = path
         self._webhooks = webhooks or []
+        self._telegram_token = telegram_bot_token
+        self._telegram_chat_ids = telegram_chat_ids or []
         self._file_exists = os.path.isfile(path)
         self._warned = False
         self._recent: dict[str, datetime] = {}
@@ -46,6 +55,7 @@ class CSVLogger:
                 print(f"[warning] Cannot write to {self._path}: {e} — will retry each cycle")
                 self._warned = True
         discord_notifier.notify(self._webhooks, contact, iso_ts)
+        telegram_notifier.notify(self._telegram_token, self._telegram_chat_ids, contact, iso_ts)
 
     def _is_duplicate(self, key: str) -> bool:
         cutoff = datetime.now() - timedelta(seconds=DEDUP_COOLDOWN_SECONDS)
