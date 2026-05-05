@@ -5,7 +5,7 @@ import urllib.request
 from config import Ship
 
 _USER_AGENT = "DiscordBot (https://github.com/pa0l0s/eve-gate-logger, 1.0)"
-_TAG_RE = re.compile(r'\[([A-Z][A-Z \-]{0,4})\]')
+_TAG_RE = re.compile(r'\[([A-Z][A-Z \-\.]{0,4})\]')
 
 # ticker -> zKillboard URL (or None if not resolvable), persists for the session
 _corp_cache: dict[str, str | None] = {}
