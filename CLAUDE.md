@@ -5,53 +5,42 @@
 The working directory lives inside WSL (`\\wsl$\Ubuntu\home\paolo\claude-eve-gate-logger`).
 The shell is **PowerShell on Windows**, but SSH keys and the git remote are configured inside WSL.
 
-### Rule: always use WSL for git and Linux commands
+### Git — use Windows PowerShell directly
 
-**Never** run `git` directly in PowerShell for this repo — the UNC path
-(`\\wsl$\...`) triggers a "dubious ownership" error and SSH host-key checks fail
-because the Windows SSH agent cannot reach the WSL key.
-
-**Always** delegate git and Linux commands to WSL via:**
+The remote is HTTPS and credentials are stored in Windows Credential Manager,
+so all git operations work from PowerShell in the UNC path:
 
 ```powershell
-# One-off command
-wsl -e bash -c "cd ~/claude-eve-gate-logger && <command>"
-
-# Multi-step pipeline
-wsl -e bash -c "cd ~/claude-eve-gate-logger && git add -p && git commit -m '...' && git push"
+cd "\\wsl$\Ubuntu\home\paolo\claude-eve-gate-logger"
+git status
+git add file.py
+git commit -m "message"
+git push
+git pull
 ```
 
-The `~/claude-eve-gate-logger` path inside WSL is the same directory as
-`\\wsl$\Ubuntu\home\paolo\claude-eve-gate-logger` on Windows.
-
-### Common patterns
-
-| Task | Command |
-|------|---------|
-| `git status` | `wsl -e bash -c "cd ~/claude-eve-gate-logger && git status"` |
-| `git add` + `git commit` | `wsl -e bash -c "cd ~/claude-eve-gate-logger && git add FILE && git commit -m 'msg'"` |
-| `git push` | `wsl -e bash -c "cd ~/claude-eve-gate-logger && git push"` |
-| `git pull` | `wsl -e bash -c "cd ~/claude-eve-gate-logger && git pull"` |
-| `git log` | `wsl -e bash -c "cd ~/claude-eve-gate-logger && git log --oneline -10"` |
-| Run any bash script | `wsl -e bash -c "cd ~/claude-eve-gate-logger && bash script.sh"` |
-
-### Commit message with newlines (PowerShell here-string → WSL)
+For multi-line commit messages use a PowerShell here-string:
 
 ```powershell
-wsl -e bash -c @'
-cd ~/claude-eve-gate-logger
-git add file.py
-git commit -m "Subject line
+cd "\\wsl$\Ubuntu\home\paolo\claude-eve-gate-logger"
+git commit -m "$(cat <<'EOF'
+Subject line
 
 Body paragraph here.
 
-Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>"
+Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
+EOF
+)"
 git push
-'@
 ```
 
-> **Note:** the `@'...'@` PowerShell here-string passes the block verbatim to
-> `bash -c`, so newlines and `$` signs are preserved without escaping.
+### Linux commands — use WSL
+
+For bash scripts or Linux-only tools still use WSL:
+
+```powershell
+wsl -e bash -c "cd ~/claude-eve-gate-logger && <command>"
+```
 
 ## Building the exe
 
