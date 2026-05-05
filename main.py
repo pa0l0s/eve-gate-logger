@@ -56,7 +56,7 @@ def build_components(cfg: Config) -> tuple[Region, ColumnMap, ShipTracker, CSVLo
             cfg.column_map = column_map
             save_config(cfg)
 
-    return region, column_map, ShipTracker(), CSVLogger(cfg.csv_path)
+    return region, column_map, ShipTracker(), CSVLogger(cfg.csv_path, cfg.webhooks)
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Eve Gate Logger")

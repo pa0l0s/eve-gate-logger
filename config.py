@@ -1,5 +1,5 @@
 import configparser
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Optional, NamedTuple
 
 DEFAULT_INI = "settings.ini"
@@ -26,6 +26,7 @@ class Config:
     region: Optional[Region] = None
     column_map: Optional[ColumnMap] = None
     csv_path: str = "eve_overview_log.csv"
+    webhooks: list[str] = field(default_factory=list)
 
 def load_config(path: str = DEFAULT_INI) -> Config:
     parser = configparser.ConfigParser()
@@ -34,6 +35,12 @@ def load_config(path: str = DEFAULT_INI) -> Config:
     cfg = Config()
     cfg.interval_seconds = parser.getfloat("scanner", "interval_seconds", fallback=1.0)
     cfg.csv_path = parser.get("output", "csv_path", fallback="eve_overview_log.csv")
+
+    raw_webhooks = parser.get("discord", "webhooks", fallback="")
+    cfg.webhooks = [
+        u.strip() for u in raw_webhooks.replace(",", "\n").splitlines()
+        if u.strip().startswith("https://discord.com/api/webhooks/")
+    ]
 
     x = parser.get("region", "x", fallback="").strip()
     y = parser.get("region", "y", fallback="").strip()
@@ -63,9 +70,12 @@ def save_config(cfg: Config, path: str = DEFAULT_INI) -> None:
         parser["region"] = {}
     if "output" not in parser:
         parser["output"] = {}
+    if "discord" not in parser:
+        parser["discord"] = {}
 
     parser["scanner"]["interval_seconds"] = str(cfg.interval_seconds)
     parser["output"]["csv_path"] = cfg.csv_path
+    parser["discord"]["webhooks"] = "\n    ".join(cfg.webhooks)
 
     if cfg.region:
         parser["region"]["x"] = str(cfg.region.x)

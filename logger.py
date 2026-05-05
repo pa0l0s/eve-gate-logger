@@ -4,6 +4,7 @@ import re
 from datetime import datetime, timedelta
 from difflib import SequenceMatcher
 from config import Ship
+import discord_notifier
 
 FIELDNAMES = ["timestamp", "name", "type", "event"]
 DEDUP_COOLDOWN_SECONDS = 120
@@ -11,8 +12,9 @@ DEDUP_SIMILARITY = 0.75
 
 
 class CSVLogger:
-    def __init__(self, path: str) -> None:
+    def __init__(self, path: str, webhooks: list[str] | None = None) -> None:
         self._path = path
+        self._webhooks = webhooks or []
         self._file_exists = os.path.isfile(path)
         self._warned = False
         self._recent: dict[str, datetime] = {}
@@ -21,9 +23,11 @@ class CSVLogger:
         key = _normalize(ship)
         if self._is_duplicate(key):
             return
-        self._recent[key] = datetime.now()
+        now = datetime.now()
+        self._recent[key] = now
+        iso_ts = now.strftime("%Y-%m-%dT%H:%M:%S")
         row = {
-            "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "timestamp": now.strftime("%Y-%m-%d %H:%M:%S"),
             "name": ship.name,
             "type": ship.ship_type,
             "event": "appeared",
@@ -39,6 +43,7 @@ class CSVLogger:
             if not self._warned:
                 print(f"[warning] Cannot write to {self._path}: {e} — will retry each cycle")
                 self._warned = True
+        discord_notifier.notify(self._webhooks, ship, iso_ts)
 
     def _is_duplicate(self, key: str) -> bool:
         cutoff = datetime.now() - timedelta(seconds=DEDUP_COOLDOWN_SECONDS)
