@@ -1,10 +1,13 @@
+import numpy as np
 import pytesseract
-from PIL import Image, ImageOps
+from PIL import Image
 from config import Ship, ColumnMap
 
-CONF_THRESHOLD = 50
+CONF_THRESHOLD = 35
 ROW_TOLERANCE = 8
 TESSERACT_CONFIG = "--psm 6"
+UPSCALE = 2
+BRIGHTNESS_THRESHOLD = 130  # pixels brighter than this are EVE text (white on dark bg)
 
 _EVE_COLUMN_HEADERS = frozenset({
     "Name", "Type", "Distance", "Velocity", "Corporation",
@@ -12,13 +15,17 @@ _EVE_COLUMN_HEADERS = frozenset({
     "Militia", "Size", "Status",
 })
 
-# Words that appear in EVE UI messages shown when the overview is empty.
-# Checked against the full row so split doesn't matter ("Nothing" / "Found").
 _EVE_UI_MESSAGE_WORDS = frozenset({"Nothing", "Found"})
 
+
 def preprocess_image(image: Image.Image) -> Image.Image:
-    gray = image.convert("L")
-    return ImageOps.invert(gray)
+    w, h = image.size
+    image = image.resize((w * UPSCALE, h * UPSCALE), Image.LANCZOS)
+    arr = np.array(image.convert("L"))
+    # EVE uses white text on dark background; invert so Tesseract sees black on white
+    thresh = np.where(arr > BRIGHTNESS_THRESHOLD, 0, 255).astype(np.uint8)
+    return Image.fromarray(thresh)
+
 
 def parse_overview_image(image: Image.Image, column_map: ColumnMap) -> set[Ship]:
     processed = preprocess_image(image)
@@ -32,13 +39,11 @@ def parse_overview_image(image: Image.Image, column_map: ColumnMap) -> set[Ship]
             ships.add(Ship(name, ship_type))
     return ships
 
-def _is_header_row(row: list[dict]) -> bool:
-    words = {w["text"] for w in row}
-    return len(words & _EVE_COLUMN_HEADERS) >= 2 or _EVE_UI_MESSAGE_WORDS.issubset(words)
 
 def _group_words_by_row(data: dict) -> list[list[dict]]:
     words = [
-        {"text": t, "x": data["left"][i], "y": data["top"][i]}
+        # Divide coords by UPSCALE so they match the original column_map positions
+        {"text": t, "x": data["left"][i] // UPSCALE, "y": data["top"][i] // UPSCALE}
         for i, t in enumerate(data["text"])
         if t.strip() and int(data["conf"][i]) >= CONF_THRESHOLD
     ]
@@ -56,5 +61,29 @@ def _group_words_by_row(data: dict) -> list[list[dict]]:
     rows.append(sorted(current, key=lambda w: w["x"]))
     return rows
 
+
 def _extract_column_text(row: list[dict], col_start: int, col_end: int) -> str:
-    return " ".join(w["text"] for w in row if col_start <= w["x"] < col_end).strip()
+    return " ".join(
+        w["text"] for w in row
+        if col_start <= w["x"] < col_end and not _is_noise_word(w["text"])
+    ).strip()
+
+
+def _is_noise_word(text: str) -> bool:
+    """Filter distance/speed numbers, 'km', and OCR garbage (icons, symbols)."""
+    if text.lower() == "km":
+        return True
+    if text.isdigit():
+        return True
+    # Numbers with OCR noise appended (e.g. '38¢', '1b4') — starts with a digit
+    if text[0].isdigit():
+        return True
+    # No alphabetic characters at all (e.g. '©.', 'i¢=', '=>')
+    if not any(c.isalpha() for c in text):
+        return True
+    return False
+
+
+def _is_header_row(row: list[dict]) -> bool:
+    words = {w["text"] for w in row}
+    return len(words & _EVE_COLUMN_HEADERS) >= 2 or _EVE_UI_MESSAGE_WORDS.issubset(words)
