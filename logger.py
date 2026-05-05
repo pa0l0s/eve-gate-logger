@@ -1,13 +1,12 @@
 import csv
 import os
-import re
 from datetime import datetime, timedelta
 from difflib import SequenceMatcher
-from config import Ship
+from config import Ship, Contact
+from enrich import enrich
 import discord_notifier
 
 FIELDNAMES = ["timestamp", "name", "type", "tags", "event"]
-_TAGS_RE = re.compile(r'\[[^\]]*\]')
 DEDUP_COOLDOWN_SECONDS = 120
 DEDUP_SIMILARITY = 0.75
 
@@ -21,19 +20,18 @@ class CSVLogger:
         self._recent: dict[str, datetime] = {}
 
     def log(self, ship: Ship) -> None:
-        key = _normalize(ship)
+        contact = enrich(ship)
+        key = _normalize(contact)
         if self._is_duplicate(key):
             return
         now = datetime.now()
         self._recent[key] = now
         iso_ts = now.strftime("%Y-%m-%dT%H:%M:%S")
-        type_clean = _TAGS_RE.sub("", ship.ship_type).strip()
-        tags = " ".join(_TAGS_RE.findall(ship.ship_type))
         row = {
             "timestamp": now.strftime("%Y-%m-%d %H:%M:%S"),
-            "name": ship.name,
-            "type": type_clean,
-            "tags": tags,
+            "name": contact.pilot_name,
+            "type": contact.ship_type,
+            "tags": " ".join(f"[{t}]" for t in contact.tags),
             "event": "appeared",
         }
         try:
@@ -47,7 +45,7 @@ class CSVLogger:
             if not self._warned:
                 print(f"[warning] Cannot write to {self._path}: {e} — will retry each cycle")
                 self._warned = True
-        discord_notifier.notify(self._webhooks, ship, iso_ts)
+        discord_notifier.notify(self._webhooks, contact, iso_ts)
 
     def _is_duplicate(self, key: str) -> bool:
         cutoff = datetime.now() - timedelta(seconds=DEDUP_COOLDOWN_SECONDS)
@@ -61,8 +59,5 @@ class CSVLogger:
         pass
 
 
-def _normalize(ship: Ship) -> str:
-    combined = f"{ship.name} {ship.ship_type}"
-    # Strip all bracket content (alliance tags, complete or partial)
-    combined = re.sub(r'\s*\[.*', '', combined).strip()
-    return combined.lower()
+def _normalize(contact: Contact) -> str:
+    return f"{contact.pilot_name} {contact.ship_type}".lower()

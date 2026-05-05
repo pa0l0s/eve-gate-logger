@@ -18,7 +18,14 @@ class ColumnMap(NamedTuple):
 
 class Ship(NamedTuple):
     name: str
-    ship_type: str
+    ship_type: str  # raw OCR text from the type column, may include tags
+
+
+class Contact(NamedTuple):
+    pilot_name: str
+    ship_type: str           # canonical ship name (or raw type without tags)
+    ship_type_id: int | None # type_id for zkillboard ship link, None if unmatched
+    tags: list[str]          # uppercase ticker strings e.g. ["SWA", "BUSHI"]
 
 @dataclass
 class Config:
