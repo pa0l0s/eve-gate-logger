@@ -43,17 +43,18 @@ class CSVLogger:
             "tags": " ".join(f"[{t}]" for t in contact.tags),
             "event": "appeared",
         }
-        try:
-            with open(self._path, "a", newline="", encoding="utf-8") as f:
-                writer = csv.DictWriter(f, fieldnames=FIELDNAMES)
-                if not self._file_exists:
-                    writer.writeheader()
-                    self._file_exists = True
-                writer.writerow(row)
-        except PermissionError as e:
-            if not self._warned:
-                print(f"[warning] Cannot write to {self._path}: {e} — will retry each cycle")
-                self._warned = True
+        if self._path:
+            try:
+                with open(self._path, "a", newline="", encoding="utf-8") as f:
+                    writer = csv.DictWriter(f, fieldnames=FIELDNAMES)
+                    if not self._file_exists:
+                        writer.writeheader()
+                        self._file_exists = True
+                    writer.writerow(row)
+            except PermissionError as e:
+                if not self._warned:
+                    print(f"[warning] Cannot write to {self._path}: {e} — will retry each cycle")
+                    self._warned = True
         discord_notifier.notify(self._webhooks, contact, iso_ts)
         telegram_notifier.notify(self._telegram_token, self._telegram_chat_ids, contact, iso_ts)
 

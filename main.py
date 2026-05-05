@@ -66,6 +66,7 @@ def main() -> None:
     parser.add_argument("--setup", action="store_true", help="Force region selector open")
     parser.add_argument("--reset", action="store_true", help="Clear saved region and re-detect")
     parser.add_argument("--config", default=DEFAULT_INI, help="Path to settings.ini")
+    parser.add_argument("--nocsv", action="store_true", help="Disable CSV logging (notifications still sent)")
     args = parser.parse_args()
 
     cfg = load_config(args.config)
@@ -79,9 +80,13 @@ def main() -> None:
         cfg.region = None
         cfg.column_map = None
 
+    if args.nocsv:
+        cfg.csv_path = ""
+
     region, column_map, tracker, logger = build_components(cfg)
 
-    print(f"[eve-gate-logger] Scanning every {cfg.interval_seconds}s -> {cfg.csv_path}")
+    dest = cfg.csv_path if cfg.csv_path else "notifications only (--nocsv)"
+    print(f"[eve-gate-logger] Scanning every {cfg.interval_seconds}s -> {dest}")
     try:
         while True:
             try:

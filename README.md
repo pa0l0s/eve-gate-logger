@@ -120,10 +120,11 @@ Message format: `time` · pilot name · ship type · corp/alliance tags
 ## Command-Line Flags
 
 ```
-eve-gate-logger.exe [--setup] [--reset] [--config PATH]
+eve-gate-logger.exe [--setup] [--reset] [--nocsv] [--config PATH]
 
   --setup        Force the region selector overlay open
   --reset        Clear the saved region and run auto-detect again
+  --nocsv        Disable CSV logging (Discord/Telegram notifications still sent)
   --config PATH  Use a custom settings.ini (default: settings.ini next to the exe)
 ```
 
