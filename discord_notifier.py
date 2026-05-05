@@ -6,7 +6,7 @@ from config import Ship
 import ship_matcher
 
 _USER_AGENT = "DiscordBot (https://github.com/pa0l0s/eve-gate-logger, 1.0)"
-_TAG_RE = re.compile(r'\[([A-Z.\- ]{1,5})\]', re.IGNORECASE)
+_TAG_RE = re.compile(r'\[([A-Z0-9.\- ]{1,5})\]', re.IGNORECASE)
 
 # ticker -> zKillboard URL (or None if not resolvable), persists for the session
 _corp_cache: dict[str, str | None] = {}
