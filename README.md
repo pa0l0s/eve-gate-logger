@@ -14,6 +14,7 @@ No Python or Tesseract installation required — everything is bundled.
 
 - Windows 10 / 11 x64
 - EVE Online running with the overview panel visible
+- In-game overview configured to show **ships only**, with at least the following columns in order: **Name**, **Type**, **Corporation**, **Alliance**
 
 ---
 
