@@ -25,7 +25,10 @@ def notify(webhooks: list[str], ship: Ship, timestamp: str) -> None:
             req = urllib.request.Request(
                 url,
                 data=payload,
-                headers={"Content-Type": "application/json"},
+                headers={
+                    "Content-Type": "application/json",
+                    "User-Agent": "DiscordBot (https://github.com/pa0l0s/eve-gate-logger, 1.0)",
+                },
             )
             urllib.request.urlopen(req, timeout=5)
         except Exception as e:
