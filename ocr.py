@@ -6,6 +6,12 @@ CONF_THRESHOLD = 50
 ROW_TOLERANCE = 8
 TESSERACT_CONFIG = "--psm 6"
 
+_EVE_COLUMN_HEADERS = frozenset({
+    "Name", "Type", "Distance", "Velocity", "Corporation",
+    "Alliance", "Faction", "Tag", "Icon", "Radial", "Transverse",
+    "Militia", "Size", "Status",
+})
+
 def preprocess_image(image: Image.Image) -> Image.Image:
     gray = image.convert("L")
     return ImageOps.invert(gray)
@@ -18,9 +24,13 @@ def parse_overview_image(image: Image.Image, column_map: ColumnMap) -> set[Ship]
     for row in rows:
         name = _extract_column_text(row, column_map.name_start, column_map.name_end)
         ship_type = _extract_column_text(row, column_map.type_start, column_map.type_end)
-        if name and ship_type:
+        if name and ship_type and not _is_header_row(row):
             ships.add(Ship(name, ship_type))
     return ships
+
+def _is_header_row(row: list[dict]) -> bool:
+    words = {w["text"] for w in row}
+    return len(words & _EVE_COLUMN_HEADERS) >= 2
 
 def _group_words_by_row(data: dict) -> list[list[dict]]:
     words = [
