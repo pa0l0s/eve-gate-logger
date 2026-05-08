@@ -15,29 +15,47 @@ def _log_path() -> str:
     return os.path.join(base, _LOG_FILE)
 
 
+class _LazyFileHandler(logging.Handler):
+    """Creates the log file only when the first record is actually emitted."""
+
+    def __init__(self, path: str) -> None:
+        super().__init__(level=logging.WARNING)
+        self._path = path
+        self._real: RotatingFileHandler | None = None
+
+    def _ensure(self) -> RotatingFileHandler:
+        if self._real is None:
+            self._real = RotatingFileHandler(
+                self._path, maxBytes=1 * 1024 * 1024, backupCount=2, encoding="utf-8"
+            )
+            self._real.setFormatter(logging.Formatter(
+                "%(asctime)s %(levelname)s [%(module)s] %(message)s",
+                datefmt="%Y-%m-%d %H:%M:%S",
+            ))
+        return self._real
+
+    def emit(self, record: logging.LogRecord) -> None:
+        self._ensure().emit(record)
+
+    def close(self) -> None:
+        if self._real:
+            self._real.close()
+        super().close()
+
+
 def setup() -> None:
-    """Configure root logger: WARNING+ to rotating file, INFO+ to console."""
-    path = _log_path()
-
-    file_handler = RotatingFileHandler(
-        path, maxBytes=1 * 1024 * 1024, backupCount=2, encoding="utf-8"
-    )
-    file_handler.setLevel(logging.WARNING)
-    file_handler.setFormatter(logging.Formatter(
-        "%(asctime)s %(levelname)s [%(module)s] %(message)s",
-        datefmt="%Y-%m-%d %H:%M:%S",
-    ))
-
     console_handler = logging.StreamHandler(sys.stdout)
     console_handler.setLevel(logging.INFO)
     console_handler.setFormatter(logging.Formatter("%(message)s"))
+
+    path = _log_path()
+    file_handler = _LazyFileHandler(path)
 
     root = logging.getLogger()
     root.setLevel(logging.DEBUG)
     root.addHandler(file_handler)
     root.addHandler(console_handler)
 
-    # Catch unhandled exceptions and write them to the log file
     def _excepthook(exc_type, exc_value, exc_tb):
         if issubclass(exc_type, KeyboardInterrupt):
             sys.__excepthook__(exc_type, exc_value, exc_tb)
@@ -47,4 +65,3 @@ def setup() -> None:
         print(f"\n[eve-gate-logger] Crashed — details saved to {path}")
 
     sys.excepthook = _excepthook
-    logging.info(f"[eve-gate-logger] Log file: {path}")
