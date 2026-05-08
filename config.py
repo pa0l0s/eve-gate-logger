@@ -40,7 +40,7 @@ class Config:
     mouse_pause_on_start: bool = False
     mouse_pause_seconds: float = 3.0
     mouse_pause_toggle_key: str = "scroll_lock"
-    mouse_pause_deadzone: int = 0
+    mouse_pause_deadzone: int = 4
 
 def ensure_config_exists(path: str = DEFAULT_INI) -> None:
     """Write a default settings.ini with comments if none exists."""
@@ -79,7 +79,7 @@ def ensure_config_exists(path: str = DEFAULT_INI) -> None:
             "; Toggle mouse-move-pause on/off with this key\n"
             "mouse_pause_toggle_key = scroll_lock\n"
             "; Minimum mouse movement in pixels to trigger pause (0 = any movement)\n"
-            "mouse_pause_deadzone = 0\n"
+            "mouse_pause_deadzone = 4\n"
         )
 
 
