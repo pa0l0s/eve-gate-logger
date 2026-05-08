@@ -4,7 +4,7 @@ Monitors your EVE Online overview panel using OCR and logs every new contact to 
 
 ## Download
 
-**[⬇ Download eve-gate-logger-v1.2.1-windows.zip](https://github.com/pa0l0s/eve-gate-logger/releases/download/v1.2.1/eve-gate-logger-v1.2.1-windows.zip)**
+**[⬇ Download eve-gate-logger-v1.3.0-windows.zip](https://github.com/pa0l0s/eve-gate-logger/releases/download/v1.3.0/eve-gate-logger-v1.3.0-windows.zip)**
 
 No Python or Tesseract installation required — everything is bundled.
 
