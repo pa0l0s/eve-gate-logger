@@ -15,6 +15,7 @@ from tracker import ShipTracker
 from logger import CSVLogger
 from auto_detect import detect_overview_region
 from region_selector import select_region
+from pause_manager import PauseManager
 
 def run_one_cycle(
     region: Region,
@@ -85,13 +86,21 @@ def main() -> None:
         cfg.csv_path = ""
 
     region, column_map, tracker, logger = build_components(cfg)
+    pauser = PauseManager(
+        pause_key=cfg.pause_key,
+        mouse_pause_on_start=cfg.mouse_pause_on_start,
+        mouse_pause_seconds=cfg.mouse_pause_seconds,
+        mouse_pause_toggle_key=cfg.mouse_pause_toggle_key,
+    )
 
     dest = cfg.csv_path if cfg.csv_path else "notifications only (--nocsv)"
     print(f"[eve-gate-logger] Scanning every {cfg.interval_seconds}s -> {dest}")
+    print(f"[eve-gate-logger] Hold [{cfg.pause_key}] to pause | [{cfg.mouse_pause_toggle_key}] toggles mouse-move pause")
     try:
         while True:
             try:
-                run_one_cycle(region, column_map, tracker, logger)
+                if not pauser.is_paused():
+                    run_one_cycle(region, column_map, tracker, logger)
             except Exception as e:
                 print(f"[eve-gate-logger] Scan error (will retry): {e}")
             time.sleep(cfg.interval_seconds)

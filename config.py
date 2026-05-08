@@ -36,6 +36,10 @@ class Config:
     webhooks: list[str] = field(default_factory=list)
     telegram_bot_token: str = ""
     telegram_chat_ids: list[str] = field(default_factory=list)
+    pause_key: str = "ctrl"
+    mouse_pause_on_start: bool = False
+    mouse_pause_seconds: float = 3.0
+    mouse_pause_toggle_key: str = "scroll_lock"
 
 def ensure_config_exists(path: str = DEFAULT_INI) -> None:
     """Write a default settings.ini with comments if none exists."""
@@ -63,6 +67,16 @@ def ensure_config_exists(path: str = DEFAULT_INI) -> None:
             "bot_token =\n"
             "chat_ids =\n"
             ";    123456789\n"
+            "\n"
+            "[hotkeys]\n"
+            "; Hold this key to pause scanning (e.g. ctrl, alt, shift, f9, scroll_lock)\n"
+            "pause_key = ctrl\n"
+            "; Pause scanning when mouse is moving (true/false)\n"
+            "mouse_pause_on_start = false\n"
+            "; Seconds after last mouse move before scanning resumes\n"
+            "mouse_pause_seconds = 3\n"
+            "; Toggle mouse-move-pause on/off with this key\n"
+            "mouse_pause_toggle_key = scroll_lock\n"
         )
 
 
@@ -86,6 +100,11 @@ def load_config(path: str = DEFAULT_INI) -> Config:
         c.strip() for c in raw_chat_ids.replace(",", "\n").splitlines()
         if c.strip()
     ]
+
+    cfg.pause_key = parser.get("hotkeys", "pause_key", fallback="ctrl").strip()
+    cfg.mouse_pause_on_start = parser.getboolean("hotkeys", "mouse_pause_on_start", fallback=False)
+    cfg.mouse_pause_seconds = parser.getfloat("hotkeys", "mouse_pause_seconds", fallback=3.0)
+    cfg.mouse_pause_toggle_key = parser.get("hotkeys", "mouse_pause_toggle_key", fallback="scroll_lock").strip()
 
     x = parser.get("region", "x", fallback="").strip()
     y = parser.get("region", "y", fallback="").strip()

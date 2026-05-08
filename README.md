@@ -117,6 +117,27 @@ Message format: `time` · pilot name · ship type · corp/alliance tags
 
 ---
 
+## Hotkeys
+
+| Key | Action |
+|-----|--------|
+| Hold `Ctrl` (default) | Pause scanning while held — lets you browse zKillboard or other windows without triggering notifications |
+| `Scroll Lock` (default) | Toggle **mouse-move pause** on/off |
+
+When mouse-move pause is **on**, scanning stops as soon as the mouse moves and resumes 3 seconds after the last movement. This lets you click to a browser window, check zKillboard, and have scanning automatically resume when you stop moving the mouse.
+
+Both keys and all timing are configurable in `settings.ini`:
+
+```ini
+[hotkeys]
+pause_key = ctrl                ; hold to pause (ctrl, alt, shift, f9, scroll_lock, …)
+mouse_pause_on_start = false    ; start with mouse-move pause already enabled
+mouse_pause_seconds = 3         ; seconds after last mouse move before resuming
+mouse_pause_toggle_key = scroll_lock  ; key to toggle mouse-move pause on/off
+```
+
+---
+
 ## Command-Line Flags
 
 ```
