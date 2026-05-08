@@ -1,7 +1,11 @@
 import argparse
+import logging
 import os
 import sys
 import time
+
+import app_logging
+app_logging.setup()
 
 import pytesseract
 
@@ -102,7 +106,7 @@ def main() -> None:
                 if not pauser.is_paused():
                     run_one_cycle(region, column_map, tracker, logger)
             except Exception as e:
-                print(f"[eve-gate-logger] Scan error (will retry): {e}")
+                logging.error("[eve-gate-logger] Scan error (will retry): %s", e, exc_info=True)
             time.sleep(cfg.interval_seconds)
     except KeyboardInterrupt:
         print("\n[eve-gate-logger] Stopped.")
