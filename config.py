@@ -81,7 +81,7 @@ def ensure_config_exists(path: str = DEFAULT_INI) -> None:
 
 
 def load_config(path: str = DEFAULT_INI) -> Config:
-    parser = configparser.ConfigParser()
+    parser = configparser.ConfigParser(inline_comment_prefixes=(";", "#"))
     parser.read(path)
 
     cfg = Config()
