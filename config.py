@@ -37,6 +37,35 @@ class Config:
     telegram_bot_token: str = ""
     telegram_chat_ids: list[str] = field(default_factory=list)
 
+def ensure_config_exists(path: str = DEFAULT_INI) -> None:
+    """Write a default settings.ini with comments if none exists."""
+    import os
+    if os.path.exists(path):
+        return
+    with open(path, "w", encoding="utf-8") as f:
+        f.write(
+            "[scanner]\n"
+            "interval_seconds = 1.0\n"
+            "\n"
+            "[region]\n"
+            "; Filled automatically on first run — do not edit manually\n"
+            "\n"
+            "[output]\n"
+            "csv_path = eve_overview_log.csv\n"
+            "\n"
+            "[discord]\n"
+            "; Add one webhook URL per line (indented)\n"
+            "webhooks =\n"
+            ";    https://discord.com/api/webhooks/YOUR_WEBHOOK_URL\n"
+            "\n"
+            "[telegram]\n"
+            "; Get a bot token from @BotFather, then find your chat_id via getUpdates\n"
+            "bot_token =\n"
+            "chat_ids =\n"
+            ";    123456789\n"
+        )
+
+
 def load_config(path: str = DEFAULT_INI) -> Config:
     parser = configparser.ConfigParser()
     parser.read(path)

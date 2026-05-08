@@ -8,7 +8,7 @@ import pytesseract
 if getattr(sys, "frozen", False):
     pytesseract.pytesseract.tesseract_cmd = os.path.join(sys._MEIPASS, "tesseract.exe")
 
-from config import Config, Region, ColumnMap, load_config, save_config, clear_region, DEFAULT_INI
+from config import Config, Region, ColumnMap, load_config, save_config, clear_region, ensure_config_exists, DEFAULT_INI
 from capture import capture_region
 from ocr import parse_overview_image
 from tracker import ShipTracker
@@ -69,6 +69,7 @@ def main() -> None:
     parser.add_argument("--nocsv", action="store_true", help="Disable CSV logging (notifications still sent)")
     args = parser.parse_args()
 
+    ensure_config_exists(args.config)
     cfg = load_config(args.config)
 
     if args.reset:
