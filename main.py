@@ -95,6 +95,7 @@ def main() -> None:
         mouse_pause_on_start=cfg.mouse_pause_on_start,
         mouse_pause_seconds=cfg.mouse_pause_seconds,
         mouse_pause_toggle_key=cfg.mouse_pause_toggle_key,
+        mouse_pause_deadzone=cfg.mouse_pause_deadzone,
     )
 
     dest = cfg.csv_path if cfg.csv_path else "notifications only (--nocsv)"

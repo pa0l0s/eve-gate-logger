@@ -39,11 +39,13 @@ class PauseManager:
         mouse_pause_on_start: bool = False,
         mouse_pause_seconds: float = 3.0,
         mouse_pause_toggle_key: str = "scroll_lock",
+        mouse_pause_deadzone: int = 0,
     ) -> None:
         self._pause_vk = _key_vk(pause_key)
         self._toggle_vk = _key_vk(mouse_pause_toggle_key)
         self._mouse_pause_enabled = mouse_pause_on_start
         self._mouse_pause_seconds = mouse_pause_seconds
+        self._deadzone_sq = mouse_pause_deadzone * mouse_pause_deadzone  # compare squared to avoid sqrt
 
         self._last_pos = _cursor_pos()
         self._last_move_time: float = 0.0
@@ -68,7 +70,8 @@ class PauseManager:
         # --- mouse-move pause ---
         if self._mouse_pause_enabled:
             pos = _cursor_pos()
-            if pos != self._last_pos:
+            dx, dy = pos[0] - self._last_pos[0], pos[1] - self._last_pos[1]
+            if dx * dx + dy * dy > self._deadzone_sq:
                 self._last_pos = pos
                 self._last_move_time = time.monotonic()
             if self._last_move_time and time.monotonic() - self._last_move_time < self._mouse_pause_seconds:

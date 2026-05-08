@@ -40,6 +40,7 @@ class Config:
     mouse_pause_on_start: bool = False
     mouse_pause_seconds: float = 3.0
     mouse_pause_toggle_key: str = "scroll_lock"
+    mouse_pause_deadzone: int = 0
 
 def ensure_config_exists(path: str = DEFAULT_INI) -> None:
     """Write a default settings.ini with comments if none exists."""
@@ -77,6 +78,8 @@ def ensure_config_exists(path: str = DEFAULT_INI) -> None:
             "mouse_pause_seconds = 3\n"
             "; Toggle mouse-move-pause on/off with this key\n"
             "mouse_pause_toggle_key = scroll_lock\n"
+            "; Minimum mouse movement in pixels to trigger pause (0 = any movement)\n"
+            "mouse_pause_deadzone = 0\n"
         )
 
 
@@ -105,6 +108,7 @@ def load_config(path: str = DEFAULT_INI) -> Config:
     cfg.mouse_pause_on_start = parser.getboolean("hotkeys", "mouse_pause_on_start", fallback=False)
     cfg.mouse_pause_seconds = parser.getfloat("hotkeys", "mouse_pause_seconds", fallback=3.0)
     cfg.mouse_pause_toggle_key = parser.get("hotkeys", "mouse_pause_toggle_key", fallback="scroll_lock").strip()
+    cfg.mouse_pause_deadzone = parser.getint("hotkeys", "mouse_pause_deadzone", fallback=0)
 
     x = parser.get("region", "x", fallback="").strip()
     y = parser.get("region", "y", fallback="").strip()

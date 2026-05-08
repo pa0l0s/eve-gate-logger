@@ -134,6 +134,7 @@ pause_key = ctrl                ; hold to pause (ctrl, alt, shift, f9, scroll_lo
 mouse_pause_on_start = false    ; start with mouse-move pause already enabled
 mouse_pause_seconds = 3         ; seconds after last mouse move before resuming
 mouse_pause_toggle_key = scroll_lock  ; key to toggle mouse-move pause on/off
+mouse_pause_deadzone = 0        ; minimum pixels moved to count as movement (0 = any movement)
 ```
 
 ---
