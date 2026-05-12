@@ -33,6 +33,8 @@ On the first run the program tries to **auto-detect** the EVE overview region by
 - If EVE is open with the overview visible → region is detected automatically and saved to `settings.ini`
 - If EVE is not open → a **fullscreen overlay** appears; click and drag to select the overview area manually
 
+![Manual region selection overlay](docs/manual-region-select.png)
+
 The saved region is reused on every subsequent run. Use `--reset` to redo detection.
 
 ---
